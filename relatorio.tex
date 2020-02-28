@@ -1,0 +1,65 @@
+\documentclass{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[portuguese]{babel}
+
+\title{Relatório EP0}
+\author{Gabriel Henrique Pinheiro Rodrigues NUSP: 112.216-47}
+\date{February 2020}
+
+\begin{document}
+   \maketitle
+\section{Implementação}
+Na implementação do programa de gerenciamento de um aeroporto, foi utilizado duas classes principais:
+\\\\
+A \textbf{classe Avião}, que contém:
+
+\begin{itemize}
+ \item O nome da companhia aérea;
+ \item O número do avião;
+ \item Se a intenção é pousar ou decolar;
+ \item Se é um voo de emergência ou não;
+ \item O nome do aeroporto de origem ou destino;
+ \item A quantidade de combustível;
+ \item A duração do voo;
+ \item O tempo de espera;
+\end{itemize}
+E a \textbf{classe Aeroporto}, que contém :
+
+\begin{itemize}
+ \item O número de elementos da fila;
+ \item A disponibilidade de cada uma das 3 pistas;
+ \item Ponteiro para a cabeça da fila e para o último elemento;
+ \item Métodos para a manipulação da fila;
+ \item Métodos para a atualização da disponibilidade das pistas;
+\end{itemize}
+
+Por motivos de encapsulamento os elementos da fila são estruturas que apontam para aviões, essas estruturas também possuem o endereço do próximo elemento da fila e para o anterior, dessa forma a fila implementada é uma lista duplamente encadeada;
+
+Os métodos que manipulam a fila são: 
+
+\begin{itemize}
+ \item insereNoFim;
+ \item insereNoInicio;
+ \item remove;
+ \item printaElemento;
+ \item printaFila;
+\end{itemize}
+Em tese, uma fila sempre remove do início e insere no fim, porém devido a prioridade de cada voo, foram criados dois métodos de inserção.
+
+\section{Prioridades na fila}
+Cada objeto da classe Avião contém um número de 0 a 3 que define sua prioridade na fila, quanto maior o número, maior a prioridade. Os aviões e suas respectivas prioridades são definidas da seguinte forma:
+
+\begin{itemize}
+\item 3 - Aviões que estão sem combustível;
+\item 2 - Voos de emergência;
+\item 1 - Aviões que estão esperando para decolar por mais de 10\% do tempo estimado da duração da viagem;
+\item 0 - Demais aviões;
+\end{itemize}
+
+A cada unidade de tempo as posições na fila são remanejadas, de forma que os aviões são organizados por ordem descrescente de prioridade.
+
+\section{Testes}
+Para realizar os testes escolhemos K=10, T=15, C=30, porém o programa funciona bem para casos maiores.
+
+\end{document}

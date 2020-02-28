@@ -54,16 +54,12 @@ int main() {
                 aviao = new Aviao(companhiasAereas[rand()%7], rand()%900 + 100, false, rand()%2, aeroportos[rand()%33], rand()%2, 40, 0);
                 cout << "Novo aviao: ";
                 aeroporto.printaElemento(aviao);
-                aeroporto.contatoComATorre(aviao);
-                cout << "a quantidade de elementos da fila é " << aeroporto.numElem << endl;
-                cout << "j: " << j << endl;
                 
-                aviao = aeroporto.remove(aeroporto.ult);
-                cout << "Aviao removido: ";
-                aeroporto.printaElemento(aviao);
+                aeroporto.contatoComATorre(aviao);
                 
                 aeroporto.printaFila();
             }
+            
             cout << "******************************************" << endl << endl;
         //}
     }
