@@ -28,21 +28,17 @@ Aviao* geradorDeAvioes() {
     /*Número de 3 dígitos*/
     int numeroDoAviao = rand()%900+100;
     bool pouso = rand()%2;
-    bool emergencia = (rand()%10 < 2) ? true : false;
-    string aeroportoDestOrigem;
-    int quantidadeCombustivel;
-    int durVoo;
-    int tempoDeEspera;
+    bool emergencia = rand()%2;
+    string aeroportoDestOrigem = aeroportos[rand()%33];
+    int quantidadeCombustivel = 40 + rand()%40;
+    int durVoo = 30 + rand()%50;
+    int tempoDeEspera = 0;
     int prioridade = 0;
 
-   
+    cout << "pouso: " << rand()%2 << endl;
 
-
-
-    return new Aviao(companhiasAereas[rand()%7], rand()%900 + 100, false, rand()%2, aeroportos[rand()%33], rand()%2, 40, 0, );
+    return new Aviao( compAerea, numeroDoAviao, pouso, emergencia, aeroportoDestOrigem, quantidadeCombustivel, durVoo, tempoDeEspera, prioridade);
 }
-
-
 
 int main() {
     int T = 10; /*Tempo de simulação*/

@@ -55,10 +55,10 @@ class Aeroporto {
         /*Dados estatísticos*/
         int nAvioesQuePousaram;
         int nAvioesAPousar;
-        int tMedioEsperaPouso;
-        int tMedioEsperaDecolagem;
-        int quantMediaCombAvAPousar;
-        int quantMediaCombAvPousaram;
+        double tMedioEsperaPouso;
+        double tMedioEsperaDecolagem;
+        double quantMediaCombAvAPousar;
+        double quantMediaCombAvPousaram;
         int quantVoosEmerg;
 
         /*Insere os aviões na fila*/
@@ -285,13 +285,14 @@ void Aeroporto :: coletaEstatisticasEPrinta() {
     nAvioesAPousar = 0;
 
     while(aux != nullptr) {
-        if(aux->aviao->pouso) {
+        if(aux->aviao->pouso == 1) {
             tMedioEsperaPouso += aux->aviao->tempoDeEspera;
             quantMediaCombAvAPousar += aux->aviao->quantCombust;
             nAvioesAPousar++;
         }
         else if(aux->aviao->pouso == 0)
             tMedioEsperaDecolagem += aux->aviao->tempoDeEspera;
+
         aux = aux->atras;
     }
 
@@ -305,7 +306,7 @@ void Aeroporto :: coletaEstatisticasEPrinta() {
         quantMediaCombAvAPousar = -1;
     }
     ((numElem-nAvioesAPousar) != 0) ? tMedioEsperaDecolagem /= (numElem - nAvioesAPousar) : tMedioEsperaDecolagem = -1;
-    ((nAvioesQuePousaram != 0)) ? quantMediaCombAvPousaram /= nAvioesAPousar : quantMediaCombAvPousaram = -1;
+    ((nAvioesQuePousaram != 0)) ? quantMediaCombAvPousaram /= nAvioesQuePousaram : quantMediaCombAvPousaram = -1;
 
     cout << "-----------------------------ESTATÍSTICAS DO AEROPORTO--------------------------" << endl << endl;
     cout << " * Os aviões que estão esperando para pousar são: ";
