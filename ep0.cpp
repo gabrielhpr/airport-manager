@@ -5,12 +5,9 @@
 using namespace std;
 
 Aviao* geradorDeAvioes() {
+
     /********TESTES*******/
     /*O nosso aeroporto é o de CONGONHAS*/
-    
-
-    /*Número de 3 dígitos*/
-    int numeroDoAviao;
 
     /*As companhias aéreas são AZUL, GOL, LATAM, AVIANCA, AIR FRANCE, EMIRATES
     COPA AIRLINES*/
@@ -27,7 +24,22 @@ Aviao* geradorDeAvioes() {
     "SJP", "SOD", "VOT", "BAT", "BAU", "QCP", "DNO", "GRP", "NTM", "PNB", "IDO",
      "CCI", "BNU", "FEJ"};
 
-    return new Aviao(companhiasAereas[rand()%7], rand()%900 + 100, false, rand()%2, aeroportos[rand()%33], rand()%2, 40, 0);
+    string compAerea = companhiasAereas[rand()%7];
+    /*Número de 3 dígitos*/
+    int numeroDoAviao = rand()%900+100;
+    bool pouso = rand()%2;
+    bool emergencia = (rand()%10 < 2) ? true : false;
+    string aeroportoDestOrigem;
+    int quantidadeCombustivel;
+    int durVoo;
+    int tempoDeEspera;
+    int prioridade = 0;
+
+   
+
+
+
+    return new Aviao(companhiasAereas[rand()%7], rand()%900 + 100, false, rand()%2, aeroportos[rand()%33], rand()%2, 40, 0, );
 }
 
 

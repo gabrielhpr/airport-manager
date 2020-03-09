@@ -6,7 +6,7 @@ using namespace std;
 class Aviao {
     public:
         Aviao(string compArea, int numAviao, bool pous, bool emerg, 
-        string aeroDestOrig, int quantComb, int durVoo, int tempEsp);
+        string aeroDestOrig, int quantComb, int durVoo, int tempEsp, int prioridade);
         //~Aviao();
         string companhiaArea;
         int numeroDoAviao;
@@ -16,10 +16,11 @@ class Aviao {
         int quantCombust;
         int duracaoDoVoo;
         int tempoDeEspera;
+        int prioridade;
 };
 
 Aviao :: Aviao(string compArea, int numAviao, bool pous, bool emerg, 
-string aeroDestOrig, int quantComb, int durVoo, int tempEsp) {
+string aeroDestOrig, int quantComb, int durVoo, int tempEsp, int pri) {
     companhiaArea = compArea;
     numeroDoAviao = numAviao;
     pouso = pous;
@@ -28,6 +29,7 @@ string aeroDestOrig, int quantComb, int durVoo, int tempEsp) {
     quantCombust = quantComb;
     duracaoDoVoo = durVoo;
     tempoDeEspera = tempEsp;
+    prioridade = pri;
 }
 struct elementoDaFila {
     Aviao *aviao; 
@@ -256,6 +258,7 @@ bool Aeroporto :: haPistaLivre() {
     return (pista1Disponivel || pista2Disponivel || pista3Disponivel);
 }
 void Aeroporto :: atualizaFilaDeVoos() {
+    elementoDaFila* aux = cab->atras;
 
 }
 void Aeroporto :: liberaVoos() {
