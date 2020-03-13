@@ -38,6 +38,25 @@ struct elementoDaFila {
 };
 typedef struct elementoDaFila elementoDaFila;
 
+/*
+Os níveis de prioridade foram definidos da seguinte forma:
+3- avião sem combustível;
+2- emergências;
+1- aviões esperando por mais de 10% do tempo esperado de vôo
+0- vôos normais
+*/
+struct cabecaTorreDeControle {
+    elementoDaFila* elmPrioridade3Primer;
+    elementoDaFila* elmPrioridade3Ult;
+    /*
+    elementoDaFila* elmPrioridade2;
+    elementoDaFila* elmPrioridade1;
+    elementoDaFila* elmPrioridade0;
+    */
+};
+typedef struct cabecaTorreDeControle cabecaTorreDeControle;
+
+
 class Aeroporto {
     public: 
         Aeroporto();
@@ -70,10 +89,15 @@ class Aeroporto {
 
         /*Controle das filas*/
         int numElem;
+        
+        
+        
+
         elementoDaFila* cab;
         elementoDaFila* ult;
     private:
         /*Métodos*/
+        void insere(Aviao* aviao);
         void insereNoFim(Aviao* aviao);
         void insereNoInicio(Aviao* aviao); 
         Aviao* remove(elementoDaFila* elm);
@@ -114,6 +138,9 @@ Aeroporto::Aeroporto() {
     cab->atras = nullptr;
     /*A cabeça também é o último elemento da fila*/
     ult = cab;
+
+
+
 }
 
 Aeroporto::~Aeroporto() {
@@ -160,6 +187,12 @@ void Aeroporto :: printaFila(int tipoDePrintagem, int pouso) {
     }
     cout << endl;
 }
+/*somente haverá inserções no fim das filas*/
+void Aeroporto :: insere(Aviao* aviao) {
+
+}
+
+
 /*Voos sem prioridade são colocados no final da fila*/
 void Aeroporto :: insereNoFim(Aviao* aviao) {
     elementoDaFila* aux = new elementoDaFila;

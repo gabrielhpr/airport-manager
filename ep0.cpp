@@ -1,5 +1,5 @@
 #include <iostream>
-#include "ep0.h"
+#include "ep0novo.h"
 #define SECOND 1000000
 
 using namespace std;
@@ -35,6 +35,8 @@ Aviao* geradorDeAvioes() {
     int tempoDeEspera = 0;
     int prioridade = 0;
 
+    if(emergencia) prioridade = 2;
+
     cout << "pouso: " << rand()%2 << endl;
 
     return new Aviao( compAerea, numeroDoAviao, pouso, emergencia, aeroportoDestOrigem, quantidadeCombustivel, durVoo, tempoDeEspera, prioridade);
@@ -57,13 +59,13 @@ int main() {
 
     Aviao* aviao;    
     /*Delay na exibição*/
-    for (i = 0; i < 4/*T*/; i++) {
+    for (i = 0; i < 6/*T*/; i++) {
         //if(i % SECOND == 0) {
             cout << "*****************************AEROPORTO DE CONGONHAS*****************************" << endl << endl;
             printf("----------------------------------HORÁRIO %02d:%02d---------------------------------\n\n", time/60, time%60); 
             time++;
 
-            for (j = 0; j < 3/*K*/; j++) {
+            for (j = 0; j < 5/*K*/; j++) {
                 /*Objeto avião*/
                 aviao = geradorDeAvioes();
                 //cout << "Novo aviao: ";
@@ -76,7 +78,7 @@ int main() {
                 /*Quais avioes estao esperando para decolar e pousar*/
                 //aeroporto.printaFila(0, 0);
             }
-            aeroporto.atualizaFilaDeVoos();
+            //aeroporto.atualizaFilaDeVoos();
             aeroporto.liberaVoos();
             aeroporto.atualizaDispDePista();
             aeroporto.coletaEstatisticasEPrinta();
