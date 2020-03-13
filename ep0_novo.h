@@ -160,15 +160,16 @@ Aeroporto :: Aeroporto() {
     torreDeControle->primerElmPrioridade0 = nullptr;
     torreDeControle->ultElmPrioridade0 = nullptr;
 }
+/*
 Aeroporto::~Aeroporto() {
     elementoDaFila* aux;
-
+    /*
     aux = torreDeControle->primerElmPrioridade3;
     while(aux->atras != nullptr) {
         torreDeControle->primerElmPrioridade3 = aux->atras;
-        /*Apaga o aviao*/
-        delete aux->aviao;
-        /*Apaga o elemento que contém o avião*/
+        //Apaga o aviao
+        //delete aux->aviao;
+        //Apaga o elemento que contém o avião
         delete aux;
         aux = torreDeControle->primerElmPrioridade3;
     }
@@ -176,9 +177,9 @@ Aeroporto::~Aeroporto() {
     aux = torreDeControle->primerElmPrioridade2;
     while(aux->atras != nullptr) {
         torreDeControle->primerElmPrioridade2 = aux->atras;
-        /*Apaga o aviao*/
+        //Apaga o aviao
         delete aux->aviao;
-        /*Apaga o elemento que contém o avião*/
+        //Apaga o elemento que contém o avião
         delete aux;
         aux = torreDeControle->primerElmPrioridade2;
     }
@@ -186,9 +187,9 @@ Aeroporto::~Aeroporto() {
     aux = torreDeControle->primerElmPrioridade1;
     while(aux->atras != nullptr) {
         torreDeControle->primerElmPrioridade1 = aux->atras;
-        /*Apaga o aviao*/
+        //Apaga o aviao
         delete aux->aviao;
-        /*Apaga o elemento que contém o avião*/
+        //Apaga o elemento que contém o avião
         delete aux;
         aux = torreDeControle->primerElmPrioridade1;
     }
@@ -196,16 +197,17 @@ Aeroporto::~Aeroporto() {
     aux = torreDeControle->primerElmPrioridade0;
     while(aux->atras != nullptr) {
         torreDeControle->primerElmPrioridade0 = aux->atras;
-        /*Apaga o aviao*/
+        //Apaga o aviao
         delete aux->aviao;
-        /*Apaga o elemento que contém o avião*/
+        //Apaga o elemento que contém o avião
         delete aux;
         aux = torreDeControle->primerElmPrioridade0;
     }
-
+    */
     /*Deleta a cabeça*/
-    delete torreDeControle;
-}
+    //delete torreDeControle;
+//}
+
 
 /*Avioes contatam a torre de comando*/
 void Aeroporto :: contatoComATorre(Aviao* aviao) {

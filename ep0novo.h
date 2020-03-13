@@ -46,17 +46,8 @@ Os níveis de prioridade foram definidos da seguinte forma:
 0- vôos normais
 */
 struct cabecaTorreDeControle {
-    elementoDaFila* primerElmPrioridade3;
-    elementoDaFila* ultElmPrioridade3;
-
-    elementoDaFila* primerElmPrioridade2;
-    elementoDaFila* ultElmPrioridade2;
-
-    elementoDaFila* primerElmPrioridade1;
-    elementoDaFila* ultElmPrioridade1;
-
-    elementoDaFila* primerElmPrioridade0;
-    elementoDaFila* ultElmPrioridade0;
+    elementoDaFila* primerElmPrioridade[4];
+    elementoDaFila* ultElmPrioridade[4];
 };
 typedef struct cabecaTorreDeControle cabecaTorreDeControle;
 
@@ -93,10 +84,7 @@ class Aeroporto {
 
         /*Controle das filas*/
         int numElem;
-        int numElemPrio3;
-        int numElemPrio2;
-        int numElemPrio1;
-        int numElemPrio0;
+        int numElemPrio[4];
         int numAvioesCairam;
 
         /*Cabeça torre de controle*/
@@ -139,71 +127,35 @@ Aeroporto :: Aeroporto() {
     quantVoosEmerg = 0;
 
     numElem = 0;
-    numElemPrio3 = 0;
-    numElemPrio2 = 0;
-    numElemPrio1 = 0;
-    numElemPrio0 = 0;
+
+    for (int i = 0; i < 4; i++) 
+        numElemPrio[i] = 0;
+    
     numAvioesCairam = 0;
 
     /*Inicializa a cabeça torre de controle */
     torreDeControle = new cabecaTorreDeControle;
 
-    torreDeControle->primerElmPrioridade3 = nullptr;
-    torreDeControle->ultElmPrioridade3 = nullptr;
-
-    torreDeControle->primerElmPrioridade2 = nullptr;
-    torreDeControle->ultElmPrioridade2 = nullptr;
-
-    torreDeControle->primerElmPrioridade1 = nullptr;
-    torreDeControle->ultElmPrioridade1 = nullptr;
-
-    torreDeControle->primerElmPrioridade0 = nullptr;
-    torreDeControle->ultElmPrioridade0 = nullptr;
+    for(int i=0; i < 4; i++) {
+       torreDeControle->primerElmPrioridade[i] = nullptr;
+       torreDeControle->ultElmPrioridade[i] = nullptr;
+    }
 }
 Aeroporto::~Aeroporto() {
     elementoDaFila* aux;
-
-    aux = torreDeControle->primerElmPrioridade3;
-    while(aux->atras != nullptr) {
-        torreDeControle->primerElmPrioridade3 = aux->atras;
-        /*Apaga o aviao*/
-        delete aux->aviao;
-        /*Apaga o elemento que contém o avião*/
-        delete aux;
-        aux = torreDeControle->primerElmPrioridade3;
+    
+    for (int i = 0; i < 4; i++) {
+        aux = torreDeControle->primerElmPrioridade[i];
+        while(aux != nullptr && aux->atras != nullptr) {
+            torreDeControle->primerElmPrioridade[i] = aux->atras;
+            //Apaga o aviao
+            delete aux->aviao;
+            //Apaga o elemento que contém o avião
+            delete aux;
+            aux = torreDeControle->primerElmPrioridade[i];
+        }    
     }
-
-    aux = torreDeControle->primerElmPrioridade2;
-    while(aux->atras != nullptr) {
-        torreDeControle->primerElmPrioridade2 = aux->atras;
-        /*Apaga o aviao*/
-        delete aux->aviao;
-        /*Apaga o elemento que contém o avião*/
-        delete aux;
-        aux = torreDeControle->primerElmPrioridade2;
-    }
-
-    aux = torreDeControle->primerElmPrioridade1;
-    while(aux->atras != nullptr) {
-        torreDeControle->primerElmPrioridade1 = aux->atras;
-        /*Apaga o aviao*/
-        delete aux->aviao;
-        /*Apaga o elemento que contém o avião*/
-        delete aux;
-        aux = torreDeControle->primerElmPrioridade1;
-    }
-
-    aux = torreDeControle->primerElmPrioridade0;
-    while(aux->atras != nullptr) {
-        torreDeControle->primerElmPrioridade0 = aux->atras;
-        /*Apaga o aviao*/
-        delete aux->aviao;
-        /*Apaga o elemento que contém o avião*/
-        delete aux;
-        aux = torreDeControle->primerElmPrioridade0;
-    }
-
-    /*Deleta a cabeça*/
+    //Deleta a cabeça
     delete torreDeControle;
 }
 
@@ -216,6 +168,8 @@ bool Aeroporto :: solicDePousoDec(Aviao* aviao) {
     if(aviao == nullptr) return false;
     /*Se o avião tiver prioridade 0 e quiser pousar, não poderá utilizar a pista 3*/
     if(pista3Disponivel && !(aviao->prioridade == 0 && aviao->pouso == 1)) {
+        cout << "entrou na solicitacao de pouso" << endl;
+        cout << "prioridade: " << aviao->prioridade << endl; 
         /*Aumenta o número de voos de emergência realizados*/
         if (aviao->prioridade == 2) /*Emergência*/
             quantVoosEmerg++;
@@ -261,230 +215,106 @@ void Aeroporto :: atualizaDispDePista() {
 bool Aeroporto :: haPistaLivre() {
     return (pista1Disponivel || pista2Disponivel || pista3Disponivel);
 }
+
 void Aeroporto :: insere(Aviao* aviao) {
     int prioridade;
     elementoDaFila* aux;
     prioridade = aviao->prioridade;
 
-    if(prioridade == 3 && numElemPrio3 == 0) {
+    if(numElemPrio[prioridade] == 0) {
         aux = new elementoDaFila;
         aux->aviao = aviao;
         aux->atras = nullptr;
         aux->frente = nullptr;
-        torreDeControle->primerElmPrioridade3 = aux;
-        /*Se o elemento inserido é o primeiro e único da fila, então o
-        ponteiro do último passa a apontar para ele*/   
-        torreDeControle->ultElmPrioridade3 = aux;
+        torreDeControle->primerElmPrioridade[prioridade] = aux;
+        //Se o elemento inserido é o primeiro e único da fila, então o
+        //ponteiro do último passa a apontar para ele
+        torreDeControle->ultElmPrioridade[prioridade] = aux;
         numElem++;
-        numElemPrio3++;
+        numElemPrio[prioridade]++;
+        cout << "inseriu com sucesso" << endl; 
     }
-    else if(prioridade == 3 && numElemPrio3 != 0) {
+    else if(numElemPrio[prioridade] != 0) {
         aux = new elementoDaFila;
         aux->aviao = aviao;
         aux->atras = nullptr;
-        aux->frente = torreDeControle->ultElmPrioridade3;
-        torreDeControle->ultElmPrioridade3 = aux;
+        aux->frente = torreDeControle->ultElmPrioridade[prioridade];
+        //aux->frente = torreDeControle->ultElmPrioridade3;
+        torreDeControle->ultElmPrioridade[prioridade]->atras = aux;
+        //torreDeControle->ultElmPrioridade3->atras = aux;
+        torreDeControle->ultElmPrioridade[prioridade] = aux;
+        //torreDeControle->ultElmPrioridade3 = aux;
         numElem++;
-        numElemPrio3++;
-    }
-    else if(prioridade == 2 && numElemPrio2 == 0) {
-        aux = new elementoDaFila;
-        aux->aviao = aviao;
-        aux->atras = nullptr;
-        aux->frente = nullptr;
-        torreDeControle->primerElmPrioridade2 = aux;
-        /*Se o elemento inserido é o primeiro e único da fila, então o
-        ponteiro do último passa a apontar para ele*/   
-        torreDeControle->ultElmPrioridade2 = aux;
-        numElem++;
-        numElemPrio2++;
-    }
-    else if(prioridade == 2 && numElemPrio2 != 0) {
-        aux = new elementoDaFila;
-        aux->aviao = aviao;
-        aux->atras = nullptr;
-        aux->frente = torreDeControle->ultElmPrioridade2;
-        torreDeControle->ultElmPrioridade2 = aux;
-        numElem++;
-        numElemPrio2++;
-    }
-    else if(prioridade == 1 && numElemPrio1 == 0) {
-        aux = new elementoDaFila;
-        aux->aviao = aviao;
-        aux->atras = nullptr;
-        aux->frente = nullptr;
-        torreDeControle->primerElmPrioridade1 = aux;
-        /*Se o elemento inserido é o primeiro e único da fila, então o
-        ponteiro do último passa a apontar para ele*/   
-        torreDeControle->ultElmPrioridade1 = aux;
-        numElem++;
-        numElemPrio1++;
-    }
-    else if(prioridade == 1 && numElemPrio1 != 0) {
-        aux = new elementoDaFila;
-        aux->aviao = aviao;
-        aux->atras = nullptr;
-        aux->frente = torreDeControle->ultElmPrioridade1;
-        torreDeControle->ultElmPrioridade1 = aux;
-        numElem++;
-        numElemPrio1++;
-    }
-    else if(prioridade == 0 && numElemPrio0 == 0) {
-        aux = new elementoDaFila;
-        aux->aviao = aviao;
-        aux->atras = nullptr;
-        aux->frente = nullptr;
-        torreDeControle->primerElmPrioridade0 = aux;
-        /*Se o elemento inserido é o primeiro e único da fila, então o
-        ponteiro do último passa a apontar para ele*/   
-        torreDeControle->ultElmPrioridade0 = aux;
-        numElem++;
-        numElemPrio0++;
-    }
-    else if(prioridade == 0 && numElemPrio0 != 0) {
-        aux = new elementoDaFila;
-        aux->aviao = aviao;
-        aux->atras = nullptr;
-        aux->frente = torreDeControle->ultElmPrioridade0;
-        torreDeControle->ultElmPrioridade0 = aux;
-        numElem++;
-        numElemPrio0++;
+        numElemPrio[prioridade]++;
     }
 }
 /*Remove o avião da posição em que está na fila, dessa maneira será possível
 reorganizar a fila conforme os níveis de prioridades(Ex. Avião sem combustível)*/
 Aviao* Aeroporto :: remove(elementoDaFila* elm) {
-    Aviao* aviaoRemovido;
     int prioridade = elm->aviao->prioridade;
     elementoDaFila* ult;
-    aviaoRemovido = elm->aviao;
+    Aviao* aviaoRemovido = elm->aviao; 
     
     /*Se o elemento é o último da fila, atualiza o ponteiro
     que aponta para o último elemento*/
-    if(elm == torreDeControle->ultElmPrioridade3)
-        torreDeControle->ultElmPrioridade3 = elm->frente;
-    else if(elm == torreDeControle->ultElmPrioridade2)
-        torreDeControle->ultElmPrioridade2 = elm->frente;
-    else if(elm == torreDeControle->ultElmPrioridade1)
-        torreDeControle->ultElmPrioridade1 = elm->frente;
-    else if(elm == torreDeControle->ultElmPrioridade0)
-        torreDeControle->ultElmPrioridade0 = elm->frente;
+    if(elm == torreDeControle->ultElmPrioridade[prioridade])
+        torreDeControle->ultElmPrioridade[prioridade] = elm->frente;
 
-    /*Se o elemento é o primeiro da fila, a torre irá apontar para nullptr*/
-    if(elm == torreDeControle->primerElmPrioridade3)
-        torreDeControle->primerElmPrioridade3 = nullptr;
-    else if(elm == torreDeControle->primerElmPrioridade2)
-        torreDeControle->primerElmPrioridade2 = nullptr;
-    else if(elm == torreDeControle->primerElmPrioridade1)
-        torreDeControle->primerElmPrioridade1 = nullptr;
-    else if(elm == torreDeControle->primerElmPrioridade0)
-        torreDeControle->primerElmPrioridade0 = nullptr;
+    /*O elemento removido sempre e o primeiro*/
+    torreDeControle->primerElmPrioridade[prioridade] = elm->atras;
 
-    if(elm->frente != nullptr)
-        elm->frente->atras = elm->atras;
-    /*Se o elemento atrás do elm não é null, então atualiza o seu
-    ponteiro da frente*/
-    if(elm->atras != nullptr)
-        elm->atras->frente = elm->frente;
     /*Checar se só exclue o elemento ou o avião também*/
     delete elm;
     numElem--;
-    switch (prioridade) {
-        case 3:
-            numElemPrio3--;
-        break;
-
-        case 2:
-            numElemPrio2--;
-        break;
-
-        case 1:
-            numElemPrio1--;
-        break;
-
-        case 0:
-            numElemPrio0--;
-        break;
-        
-        default:
-        break;
-    }
+    numElemPrio[prioridade]--;
     return aviaoRemovido;
 }
 void Aeroporto :: atualizaSituacaoDosAvioesNaFila() {
-    elementoDaFila* aux;
+    elementoDaFila *aux, *troca;
+    Aviao* aviaoComNovaPrioridade;
+    int prioridade;
 
-    aux = torreDeControle->primerElmPrioridade3;
-    while(aux != nullptr) {
-        aux->aviao->quantCombust--;
-        aux->aviao->tempoDeEspera++;
-        if(aux->aviao->quantCombust < 0) {
-            cout << "O avião caiu" << endl;
-            remove(aux);
-            numAvioesCairam++;
+    for (prioridade = 0; prioridade < 4; prioridade++) {
+        aux = torreDeControle->primerElmPrioridade[prioridade];
+        while(aux != nullptr) {
+            aux->aviao->quantCombust--;
+            aux->aviao->tempoDeEspera++;
+            if(aux->aviao->quantCombust < 0) {
+                cout << "O avião caiu" << endl;
+                remove(aux);
+                numAvioesCairam++;
+            }
+            else if( prioridade == 0 && aux->aviao->quantCombust == 0) {
+                aux->aviao->prioridade = 3;
+                //troca armazena o aviao que esta atras do atual
+                troca = aux->atras;
+                //O aviao que mudou de prioridade ira mudar de fila
+                aviaoComNovaPrioridade = remove(aux);
+                contatoComATorre(aviaoComNovaPrioridade);
+                aux = troca;
+                continue;
+            }
+            else if( prioridade == 0 && !aux->aviao->pouso && aux->aviao->tempoDeEspera*10 > aux->aviao->duracaoDoVoo)
+                aux->aviao->prioridade = 1;
+
+            aux = aux->atras;
         }
-        aux = aux->atras;
     }
-
-    aux = torreDeControle->primerElmPrioridade2;
-    while(aux != nullptr) {
-        aux->aviao->quantCombust--;
-        aux->aviao->tempoDeEspera++;
-        if(aux->aviao->quantCombust < 0) {
-            cout << "O avião caiu" << endl;
-            remove(aux);
-            numAvioesCairam++;
-        }
-        aux = aux->atras;
-    }
-
-    aux = torreDeControle->primerElmPrioridade1;
-    while(aux != nullptr) {
-        aux->aviao->quantCombust--;
-        aux->aviao->tempoDeEspera++;
-        if(aux->aviao->quantCombust < 0) {
-            cout << "O avião caiu" << endl;
-            remove(aux);
-            numAvioesCairam++;
-        }
-        aux = aux->atras;
-    }
-
-    aux = torreDeControle->primerElmPrioridade0;
-    while(aux != nullptr) {
-        aux->aviao->quantCombust--;
-        aux->aviao->tempoDeEspera++;
-        if(aux->aviao->quantCombust < 0) {
-            cout << "O avião caiu" << endl;
-            remove(aux);
-            numAvioesCairam++;
-        }
-        else if(aux->aviao->quantCombust == 0) 
-            aux->aviao->prioridade = 3;
-
-        else if(!aux->aviao->pouso && aux->aviao->tempoDeEspera*10 > aux->aviao->duracaoDoVoo)
-            aux->aviao->prioridade = 1;
-
-        aux = aux->atras;
-    }
-    
 }
 void Aeroporto :: liberaVoos() {
-    
+
     while(haPistaLivre() == true) {
+        if(numElemPrio[3] != 0 && solicDePousoDec(torreDeControle->primerElmPrioridade[3]->aviao)) 
+            remove(torreDeControle->primerElmPrioridade[3]);
 
-        if(numElemPrio3 != 0 && solicDePousoDec(torreDeControle->primerElmPrioridade3->aviao)){} 
-            //remove(torreDeControle->primerElmPrioridade3);
-
-        else if(numElemPrio2 != 0 && solicDePousoDec(torreDeControle->primerElmPrioridade2->aviao)) {}
-            //remove(torreDeControle->primerElmPrioridade2);
+        else if(numElemPrio[2] != 0 && solicDePousoDec(torreDeControle->primerElmPrioridade[2]->aviao))
+            remove(torreDeControle->primerElmPrioridade[2]);
             
-        else if(numElemPrio1 != 0 && solicDePousoDec(torreDeControle->primerElmPrioridade1->aviao)) {}
-            //remove(torreDeControle->primerElmPrioridade1); 
+        else if(numElemPrio[1] != 0 && solicDePousoDec(torreDeControle->primerElmPrioridade[1]->aviao)) 
+            remove(torreDeControle->primerElmPrioridade[1]); 
         
-        else if(numElemPrio0 != 0 && solicDePousoDec(torreDeControle->primerElmPrioridade0->aviao)) {}
-            //remove(torreDeControle->primerElmPrioridade0); 
-
+        else if(numElemPrio[0] != 0 && solicDePousoDec(torreDeControle->primerElmPrioridade[0]->aviao)) 
+            remove(torreDeControle->primerElmPrioridade[0]); 
         /*Caso não haja mais nem aviões para pousar nem para decolar*/
         else break;
     }
@@ -499,56 +329,19 @@ void Aeroporto :: coletaEstatisticasEPrinta() {
     quantMediaCombAvAPousar = 0;
     nAvioesAPousar = 0;
 
-    aux = torreDeControle->primerElmPrioridade3;
-    while(aux != nullptr) {
-        if(aux->aviao->pouso == 1) {
-            tMedioEsperaPouso += aux->aviao->tempoDeEspera;
-            quantMediaCombAvAPousar += aux->aviao->quantCombust;
-            nAvioesAPousar++;
+    for (int i = 0; i < 4; i++) {
+        aux = torreDeControle->primerElmPrioridade[i];
+        while(aux != nullptr) {
+            if(aux->aviao->pouso == 1) {
+                tMedioEsperaPouso += aux->aviao->tempoDeEspera;
+                quantMediaCombAvAPousar += aux->aviao->quantCombust;
+                nAvioesAPousar++;
+            }
+            else if(aux->aviao->pouso == 0)
+                tMedioEsperaDecolagem += aux->aviao->tempoDeEspera;
+
+            aux = aux->atras;
         }
-        else if(aux->aviao->pouso == 0)
-            tMedioEsperaDecolagem += aux->aviao->tempoDeEspera;
-
-        aux = aux->atras;
-    }
-
-    aux = torreDeControle->primerElmPrioridade2;
-    while(aux != nullptr) {
-        if(aux->aviao->pouso == 1) {
-            tMedioEsperaPouso += aux->aviao->tempoDeEspera;
-            quantMediaCombAvAPousar += aux->aviao->quantCombust;
-            nAvioesAPousar++;
-        }
-        else if(aux->aviao->pouso == 0)
-            tMedioEsperaDecolagem += aux->aviao->tempoDeEspera;
-
-        aux = aux->atras;
-    }
-
-    aux = torreDeControle->primerElmPrioridade1;
-    while(aux != nullptr) {
-        if(aux->aviao->pouso == 1) {
-            tMedioEsperaPouso += aux->aviao->tempoDeEspera;
-            quantMediaCombAvAPousar += aux->aviao->quantCombust;
-            nAvioesAPousar++;
-        }
-        else if(aux->aviao->pouso == 0)
-            tMedioEsperaDecolagem += aux->aviao->tempoDeEspera;
-
-        aux = aux->atras;
-    }
-
-    aux = torreDeControle->primerElmPrioridade0;
-    while(aux != nullptr) {
-        if(aux->aviao->pouso == 1) {
-            tMedioEsperaPouso += aux->aviao->tempoDeEspera;
-            quantMediaCombAvAPousar += aux->aviao->quantCombust;
-            nAvioesAPousar++;
-        }
-        else if(aux->aviao->pouso == 0)
-            tMedioEsperaDecolagem += aux->aviao->tempoDeEspera;
-
-        aux = aux->atras;
     }
 
     if(nAvioesAPousar != 0) {
@@ -593,20 +386,26 @@ void Aeroporto :: printaElemento(Aviao* aviao) {
 void Aeroporto :: printaFila(int tipoDePrintagem, int pouso) {
     int nPouso, nDec;
     nPouso = nDec = 0;
-    elementoDaFila* aux = torreDeControle->primerElmPrioridade0;
-    while (aux != nullptr) {
-        if(tipoDePrintagem == 0)
-            printaElemento(aux->aviao);
-        else {
-            /*Quebra a linha na printagem do terminal*/
-            if(pouso && aux->aviao->pouso) nPouso++;
-            else if(!pouso && !aux->aviao->pouso) nDec++;
-            if(nPouso == 5 || nDec == 5) cout << endl << "   ";
+    elementoDaFila* aux;
 
-            printaAviao(aux->aviao, pouso);
-        }
-        aux = aux->atras;
+    for (int i = 0; i < 4; i++) {
+        aux = torreDeControle->primerElmPrioridade[i];
+        while (aux != nullptr) {
+            if(tipoDePrintagem == 0)
+                printaElemento(aux->aviao);
+            else {
+                /*Quebra a linha na printagem do terminal*/
+                if(pouso && aux->aviao->pouso) nPouso++;
+                else if(!pouso && !aux->aviao->pouso) nDec++;
+
+                if( (nPouso+1 % 5) == 0 || (nDec+1 % 5) == 0) cout << endl << "   ";
+                
+                printaAviao(aux->aviao, pouso);
+            }
+            aux = aux->atras;
+        }    
     }
     cout << endl;
 }
 #endif
+/*O codigo tinha 644 linhas de codigo*/
