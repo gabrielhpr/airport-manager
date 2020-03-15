@@ -1,4 +1,4 @@
-#include <bits/stdc++.h>
+#include <iostream>
 #ifndef AEROPORTO_H
 #define AEROPORTO_H
 using namespace std;
@@ -7,7 +7,6 @@ class Aviao {
     public:
         Aviao(string compArea, int numAviao, bool pous, bool emerg, 
         string aeroDestOrig, int quantComb, int durVoo, int tempEsp, int prioridade);
-        //~Aviao();
         string companhiaArea;
         int numeroDoAviao;
         bool pouso;
@@ -31,6 +30,7 @@ string aeroDestOrig, int quantComb, int durVoo, int tempEsp, int pri) {
     tempoDeEspera = tempEsp;
     prioridade = pri;
 }
+
 struct elementoDaFila {
     Aviao *aviao; 
     struct elementoDaFila *atras;
@@ -42,7 +42,7 @@ typedef struct elementoDaFila elementoDaFila;
 Os níveis de prioridade foram definidos da seguinte forma:
 3- avião sem combustível;
 2- emergências;
-1- aviões esperando por mais de 10% do tempo esperado de vôo
+1- aviões esperando por mais de 10% do tempo esperado de vôo para decolar
 0- vôos normais
 */
 struct cabecaTorreDeControle {
@@ -51,11 +51,13 @@ struct cabecaTorreDeControle {
 };
 typedef struct cabecaTorreDeControle cabecaTorreDeControle;
 
-
 class Aeroporto {
     public: 
         Aeroporto();
         ~Aeroporto();
+
+        /*DADOS*/
+
         /*Controle das pistas*/
         bool pista1Disponivel;
         bool pista2Disponivel;
@@ -65,7 +67,7 @@ class Aeroporto {
         int tempLibPista1;
         int tempLibPista2;
         int tempLibPista3;
-
+    
         /*Dados estatísticos*/
         int nAvioesQuePousaram;
         int nAvioesAPousar;
@@ -73,50 +75,56 @@ class Aeroporto {
         double tMedioEsperaDecolagem;
         double quantMediaCombAvAPousar;
         double quantMediaCombAvPousaram;
+        double quantCombTotalAvPousaram;
         int quantVoosEmerg;
+        int nAvioesQueDecolaram;
+        int numAvioesCairam;
 
-        /*Insere os aviões na fila*/
+        /*Controle das filas*/
+        int numElem;
+        /*Informa a quantidade de aviões de cada prioridade*/
+        int numElemPrio[4];
+
+        /*Torre de controle - cabeça que aponta para as quatro filas com prioridades distintas*/
+        cabecaTorreDeControle* torreDeControle;
+
+        /*MÉTODOS*/
+
+        /*Checa se é possível inserir os aviões na fila e insere se possível*/
         void contatoComATorre(Aviao* aviao);
+        /*Caso não haja possibilidade de entrar na fila, o avião é enviado ao aeroporto mais próximo*/
+        void envioParaOutroAeroporto(Aviao* aviao);
         /*Informa se o avião consegue utilizar alguma pista ou não*/
         bool solicDePousoDec(Aviao* aviao);
         void atualizaDispDePista();
         bool haPistaLivre();
-
-        /*Controle das filas*/
-        int numElem;
-        int numElemPrio[4];
-        int numAvioesCairam;
-
-        /*Cabeça torre de controle*/
-        cabecaTorreDeControle* torreDeControle;
-
-    private:
-        /*Métodos*/
-        void insere(Aviao* aviao);
-        Aviao* remove(elementoDaFila* elm);
-
-    public:
         /*Rearranja os elementos da fila de acordo com suas prioridades*/
         void atualizaSituacaoDosAvioesNaFila();
         /*Libera os voos de acordo com a disponibilidade das pistas*/
         void liberaVoos();
         void coletaEstatisticasEPrinta();
+
+        /*Métodos de exibição*/
         void printaAviao(Aviao* aviao, int pouso);
         void printaElemento(Aviao* aviao);
         /*tipoDePrintagem(0-exibe elemento completo, 1-exibe o ID do aviao se atender aos parametros - pouso ou não)*/
         void printaFila(int tipoDePrintagem, int pouso);
+        void printaFilaCompleta();
+    private:
+        /*Métodos de manipulação das filas*/
+        void insere(Aviao* aviao);
+        Aviao* remove(elementoDaFila* elm);
+        void liberaAviao(Aviao* aviao);
 
 };
 
 Aeroporto :: Aeroporto() {
-    pista1Disponivel = true;
-    pista2Disponivel = true;
-    pista3Disponivel = true;
+
+    pista1Disponivel = pista2Disponivel = pista3Disponivel = true;
+
     todasPistasOcupadas = false;
 
-    tempLibPista1 = 0;
-    tempLibPista2 = 0;
-    tempLibPista3 = 0;
+    tempLibPista1 = tempLibPista2 = tempLibPista3 = 0;
 
     nAvioesQuePousaram = 0;
     nAvioesAPousar = 0;
@@ -124,14 +132,14 @@ Aeroporto :: Aeroporto() {
     tMedioEsperaDecolagem = 0;
     quantMediaCombAvAPousar = 0;
     quantMediaCombAvPousaram = 0;
+    quantCombTotalAvPousaram = 0;
     quantVoosEmerg = 0;
+    nAvioesQueDecolaram = 0;
+    numAvioesCairam = 0;
 
     numElem = 0;
-
     for (int i = 0; i < 4; i++) 
         numElemPrio[i] = 0;
-    
-    numAvioesCairam = 0;
 
     /*Inicializa a cabeça torre de controle */
     torreDeControle = new cabecaTorreDeControle;
@@ -140,17 +148,18 @@ Aeroporto :: Aeroporto() {
        torreDeControle->primerElmPrioridade[i] = nullptr;
        torreDeControle->ultElmPrioridade[i] = nullptr;
     }
+
 }
 Aeroporto::~Aeroporto() {
     elementoDaFila* aux;
     
     for (int i = 0; i < 4; i++) {
         aux = torreDeControle->primerElmPrioridade[i];
-        while(aux != nullptr && aux->atras != nullptr) {
+        while (aux != nullptr) {
             torreDeControle->primerElmPrioridade[i] = aux->atras;
             //Apaga o aviao
             delete aux->aviao;
-            //Apaga o elemento que contém o avião
+            //Apaga o elemento que contém o ponteiro para o avião
             delete aux;
             aux = torreDeControle->primerElmPrioridade[i];
         }    
@@ -161,40 +170,60 @@ Aeroporto::~Aeroporto() {
 
 /*Avioes contatam a torre de comando*/
 void Aeroporto :: contatoComATorre(Aviao* aviao) {
-    insere(aviao);
+    if(aviao->prioridade == 2 && numElemPrio[2] >= 9)
+        envioParaOutroAeroporto(aviao);
+    /*O aeroporto só possue 3 pistas, leva-se uma unidade de tempo para decolar/pousar e
+    mais 2 unidades para a liberação da pista, logo um avião de emergência precisa de no mínimo
+    quantAvioesEmergenciaFila/3 * 3unidades de tempo + 2 unidades = numElemPrio[2] + 2 de combustível,
+    pois quando o avião entrar na fila pode ser que a pista já esteja indisponível por 2 segundo */
+    else if(aviao->prioridade == 2 && (aviao->quantCombust < numElemPrio[2]+2))
+        envioParaOutroAeroporto(aviao);
+    else if(aviao->prioridade == 0 && aviao->pouso && aviao->quantCombust < numElem+2)
+        envioParaOutroAeroporto(aviao);
+    else
+        insere(aviao);
+}
+
+void Aeroporto :: envioParaOutroAeroporto(Aviao* aviao) {
+    /*
+    cout << "O avião: " << aviao->companhiaArea << aviao->numeroDoAviao << 
+    "foi enviado para outro aeroporto" << endl;*/
+    delete aviao;
 }
 
 bool Aeroporto :: solicDePousoDec(Aviao* aviao) {
     if(aviao == nullptr) return false;
     /*Se o avião tiver prioridade 0 e quiser pousar, não poderá utilizar a pista 3*/
-    if(pista3Disponivel && !(aviao->prioridade == 0 && aviao->pouso == 1)) {
-        cout << "entrou na solicitacao de pouso" << endl;
-        cout << "prioridade: " << aviao->prioridade << endl; 
+    if(pista3Disponivel && (aviao->prioridade == 0 && aviao->pouso == 1) == false) {
         /*Aumenta o número de voos de emergência realizados*/
         if (aviao->prioridade == 2) /*Emergência*/
             quantVoosEmerg++;
         if (aviao->pouso) {
-            quantMediaCombAvPousaram += aviao->quantCombust;
+            quantCombTotalAvPousaram += aviao->quantCombust;
             nAvioesQuePousaram++;
         }
+        else nAvioesQueDecolaram++;
+
         pista3Disponivel = false;
         tempLibPista3 = 2;
         return true;
     }
     else if (pista2Disponivel) {
         if (aviao->pouso) {
-            quantMediaCombAvPousaram += aviao->quantCombust;
+            quantCombTotalAvPousaram += aviao->quantCombust;
             nAvioesQuePousaram++;
         }
+        else nAvioesQueDecolaram++;
         pista2Disponivel = false;
         tempLibPista2 = 2;
         return true;
     }
     else if (pista1Disponivel) {
         if (aviao->pouso) {
-            quantMediaCombAvPousaram += aviao->quantCombust;
+            quantCombTotalAvPousaram += aviao->quantCombust;
             nAvioesQuePousaram++;
         }
+        else nAvioesQueDecolaram;
         pista1Disponivel = false;
         tempLibPista1 = 2;
         return true;
@@ -203,6 +232,7 @@ bool Aeroporto :: solicDePousoDec(Aviao* aviao) {
         return false;
 }
 
+/*Atualiza o tempo para a liberação de cada pista e a disponibilidade das mesmas*/
 void Aeroporto :: atualizaDispDePista() {
     if(!pista1Disponivel) 
         if(--tempLibPista1 == 0) pista1Disponivel = true;
@@ -212,14 +242,14 @@ void Aeroporto :: atualizaDispDePista() {
         if(--tempLibPista3 == 0) pista3Disponivel = true;
 }
 
+/*Informa se há alguma pista está disponível ou se todas já estão ocupadas*/
 bool Aeroporto :: haPistaLivre() {
     return (pista1Disponivel || pista2Disponivel || pista3Disponivel);
 }
 
 void Aeroporto :: insere(Aviao* aviao) {
-    int prioridade;
     elementoDaFila* aux;
-    prioridade = aviao->prioridade;
+    int prioridade = aviao->prioridade;
 
     if(numElemPrio[prioridade] == 0) {
         aux = new elementoDaFila;
@@ -232,9 +262,8 @@ void Aeroporto :: insere(Aviao* aviao) {
         torreDeControle->ultElmPrioridade[prioridade] = aux;
         numElem++;
         numElemPrio[prioridade]++;
-        cout << "inseriu com sucesso" << endl; 
     }
-    else if(numElemPrio[prioridade] != 0) {
+    else if(numElemPrio[prioridade] > 0) {
         aux = new elementoDaFila;
         aux->aviao = aviao;
         aux->atras = nullptr;
@@ -252,69 +281,115 @@ void Aeroporto :: insere(Aviao* aviao) {
 reorganizar a fila conforme os níveis de prioridades(Ex. Avião sem combustível)*/
 Aviao* Aeroporto :: remove(elementoDaFila* elm) {
     int prioridade = elm->aviao->prioridade;
-    elementoDaFila* ult;
-    Aviao* aviaoRemovido = elm->aviao; 
+    elementoDaFila* aux;
+    Aviao* aviaoRemovido = elm->aviao;
+
+    aux = torreDeControle->primerElmPrioridade[prioridade];
+    while(aux != nullptr) {
+        if(aux == elm) {
+            /*Não é o primeiro elemento da fila*/
+            if(aux->frente != nullptr) {
+                aux->frente->atras = aux->atras;
+            }
+            /*É o primeiro elemento da fila*/
+            else {
+                torreDeControle->primerElmPrioridade[prioridade] = aux->atras;
+            }
+            if(aux->atras != nullptr) {
+                aux->atras->frente = aux->frente;
+            }
+            /*Se o elemento é o último da fila, atualiza o ponteiro
+            que aponta para o último elemento*/
+            else {
+                torreDeControle->ultElmPrioridade[prioridade] = elm->frente;
+            }
+        }
+        aux = aux->atras;
+    }
     
-    /*Se o elemento é o último da fila, atualiza o ponteiro
-    que aponta para o último elemento*/
-    if(elm == torreDeControle->ultElmPrioridade[prioridade])
-        torreDeControle->ultElmPrioridade[prioridade] = elm->frente;
-
-    /*O elemento removido sempre e o primeiro*/
-    torreDeControle->primerElmPrioridade[prioridade] = elm->atras;
-
     /*Checar se só exclue o elemento ou o avião também*/
     delete elm;
-    numElem--;
+    numElem--;  
     numElemPrio[prioridade]--;
     return aviaoRemovido;
 }
+
+void Aeroporto :: liberaAviao(Aviao* aviao) {
+    delete aviao;
+}
+
 void Aeroporto :: atualizaSituacaoDosAvioesNaFila() {
     elementoDaFila *aux, *troca;
     Aviao* aviaoComNovaPrioridade;
     int prioridade;
-
+    int nAvioesComRiscoDeComb = 0;
+    int nAvioesComFuturoRiscoDeComb = 0;
+    
     for (prioridade = 0; prioridade < 4; prioridade++) {
         aux = torreDeControle->primerElmPrioridade[prioridade];
         while(aux != nullptr) {
-            aux->aviao->quantCombust--;
+            //Somente os aviões que querem pousar possuem seu combustível reduzido com o tempo
+            if(aux->aviao->pouso)
+                aux->aviao->quantCombust--;
             aux->aviao->tempoDeEspera++;
+
+           
             if(aux->aviao->quantCombust < 0) {
                 cout << "O avião caiu" << endl;
-                remove(aux);
+                liberaAviao(remove(aux));
                 numAvioesCairam++;
             }
-            else if( prioridade == 0 && aux->aviao->quantCombust == 0) {
-                aux->aviao->prioridade = 3;
+            else if( prioridade == 0 && aux->aviao->quantCombust <= 5 && aux->aviao->quantCombust > 2)
+                nAvioesComFuturoRiscoDeComb++;
+            else if( prioridade == 0 && aux->aviao->quantCombust <= 2 && nAvioesComRiscoDeComb <= 3) {
+                nAvioesComRiscoDeComb++;
                 //troca armazena o aviao que esta atras do atual
                 troca = aux->atras;
                 //O aviao que mudou de prioridade ira mudar de fila
                 aviaoComNovaPrioridade = remove(aux);
+                aviaoComNovaPrioridade->prioridade = 3;
                 contatoComATorre(aviaoComNovaPrioridade);
                 aux = troca;
                 continue;
             }
-            else if( prioridade == 0 && !aux->aviao->pouso && aux->aviao->tempoDeEspera*10 > aux->aviao->duracaoDoVoo)
-                aux->aviao->prioridade = 1;
-
+            else if ( prioridade == 0 && aux->aviao->quantCombust <= 5 && nAvioesComFuturoRiscoDeComb > 3) {
+                troca = aux->atras;
+                //O aviao que mudou de prioridade ira mudar de fila
+                aviaoComNovaPrioridade = remove(aux);
+                envioParaOutroAeroporto(aviaoComNovaPrioridade);
+                aux = troca;
+                continue;
+            }
+            
+            else if( prioridade == 0 && !aux->aviao->pouso && (aux->aviao->tempoDeEspera > aux->aviao->duracaoDoVoo/10) ) {
+                troca = aux->atras;
+                //O aviao que mudou de prioridade ira mudar de fila
+                aviaoComNovaPrioridade = remove(aux);
+                aviaoComNovaPrioridade->prioridade = 1;
+                contatoComATorre(aviaoComNovaPrioridade);
+                aux = troca;
+                continue;    
+            }
+            
             aux = aux->atras;
         }
     }
+    
 }
 void Aeroporto :: liberaVoos() {
 
     while(haPistaLivre() == true) {
-        if(numElemPrio[3] != 0 && solicDePousoDec(torreDeControle->primerElmPrioridade[3]->aviao)) 
-            remove(torreDeControle->primerElmPrioridade[3]);
+        if(torreDeControle->primerElmPrioridade[3] != nullptr && solicDePousoDec(torreDeControle->primerElmPrioridade[3]->aviao)) 
+            liberaAviao(remove(torreDeControle->primerElmPrioridade[3]));
 
-        else if(numElemPrio[2] != 0 && solicDePousoDec(torreDeControle->primerElmPrioridade[2]->aviao))
-            remove(torreDeControle->primerElmPrioridade[2]);
+        else if(torreDeControle->primerElmPrioridade[2] != nullptr && solicDePousoDec(torreDeControle->primerElmPrioridade[2]->aviao))
+            liberaAviao(remove(torreDeControle->primerElmPrioridade[2]));
             
-        else if(numElemPrio[1] != 0 && solicDePousoDec(torreDeControle->primerElmPrioridade[1]->aviao)) 
-            remove(torreDeControle->primerElmPrioridade[1]); 
+        else if(torreDeControle->primerElmPrioridade[1] != nullptr && solicDePousoDec(torreDeControle->primerElmPrioridade[1]->aviao)) 
+            liberaAviao(remove(torreDeControle->primerElmPrioridade[1])); 
         
-        else if(numElemPrio[0] != 0 && solicDePousoDec(torreDeControle->primerElmPrioridade[0]->aviao)) 
-            remove(torreDeControle->primerElmPrioridade[0]); 
+        else if(torreDeControle->primerElmPrioridade[0] != nullptr && solicDePousoDec(torreDeControle->primerElmPrioridade[0]->aviao)) 
+            liberaAviao(remove(torreDeControle->primerElmPrioridade[0])); 
         /*Caso não haja mais nem aviões para pousar nem para decolar*/
         else break;
     }
@@ -346,16 +421,15 @@ void Aeroporto :: coletaEstatisticasEPrinta() {
 
     if(nAvioesAPousar != 0) {
         tMedioEsperaPouso /= nAvioesAPousar;
-        quantMediaCombAvAPousar /= nAvioesAPousar;
+        quantMediaCombAvAPousar = quantMediaCombAvAPousar / nAvioesAPousar;
     }
     /*Não há informações acerca dos aviões*/
     else {
-        tMedioEsperaPouso = -1;
+        tMedioEsperaPouso = 0;
         quantMediaCombAvAPousar = -1;
     }
-    ((numElem-nAvioesAPousar) != 0) ? tMedioEsperaDecolagem /= (numElem - nAvioesAPousar) : tMedioEsperaDecolagem = -1;
-    ((nAvioesQuePousaram != 0)) ? quantMediaCombAvPousaram /= nAvioesQuePousaram : quantMediaCombAvPousaram = -1;
-
+    ((numElem-nAvioesAPousar) != 0) ? tMedioEsperaDecolagem /= (numElem - nAvioesAPousar) : tMedioEsperaDecolagem = 0;
+    ((nAvioesQuePousaram != 0)) ? quantMediaCombAvPousaram = quantCombTotalAvPousaram/nAvioesQuePousaram : quantMediaCombAvPousaram = -1;
     cout << "-----------------------------ESTATÍSTICAS DO AEROPORTO--------------------------" << endl << endl;
     cout << " * Os aviões que estão esperando para pousar são: ";
     printaFila(1, 1);
@@ -368,6 +442,8 @@ void Aeroporto :: coletaEstatisticasEPrinta() {
     cout << " * A quantidade média de combustível dos aviões esperando para pousar é: " << quantMediaCombAvAPousar << endl << endl;
     cout << " * A quantidade média de combustível dos aviões que pousaram: " << quantMediaCombAvPousaram << endl << endl;
     cout << " * A quantidade de aviões pousando/decolando em condições de emergência é: " << quantVoosEmerg << endl << endl;
+    cout << " * A quantidade total de aviões que já pousaram é: " << nAvioesQuePousaram << endl << endl;
+    cout << " * A quantidade total de aviões que já decolaram é: " << nAvioesQueDecolaram << endl << endl;
     cout << " * A quantidade de aviões que cairam é: " << numAvioesCairam << endl;
     cout << "--------------------------------------------------------------------------------" << endl;
 }
@@ -379,9 +455,10 @@ void Aeroporto :: printaAviao(Aviao* aviao, int pouso) {
 }
 void Aeroporto :: printaElemento(Aviao* aviao) {
     cout << aviao->companhiaArea << aviao->numeroDoAviao <<
-    " emerg: " << aviao->emergencia << " , quantCombus: " << aviao->quantCombust <<
-    " , durVoo: " << aviao->duracaoDoVoo << " , tempDeEspera: " << aviao->tempoDeEspera <<
-    " , destino: "<< aviao->aeroportoDestOrig << endl;
+    " , pri: " << aviao->prioridade << " , emg: " << aviao->emergencia <<
+    " , pouso: " << aviao->pouso << " , qCom: " << aviao->quantCombust <<
+    " , durVoo: " << aviao->duracaoDoVoo << " , tEsp: " << aviao->tempoDeEspera <<
+    " , dest: "<< aviao->aeroportoDestOrig << endl;
 }
 void Aeroporto :: printaFila(int tipoDePrintagem, int pouso) {
     int nPouso, nDec;
@@ -407,5 +484,16 @@ void Aeroporto :: printaFila(int tipoDePrintagem, int pouso) {
     }
     cout << endl;
 }
-#endif
+void Aeroporto :: printaFilaCompleta() {
+    elementoDaFila* aux;
+    for (int i = 3; i >= 0; i--) {
+        aux = torreDeControle->primerElmPrioridade[i];
+        cout << "Voos de prioridade" << i << ": " << endl;
+        while(aux != nullptr) {
+            printaElemento(aux->aviao);
+            aux = aux->atras;
+        }    
+    }
+}
+#endif  
 /*O codigo tinha 644 linhas de codigo*/
