@@ -5,7 +5,7 @@
 
 using namespace std;
 
-Aviao* geradorDeAvioes() {
+Aviao* geradorDeAvioes(int C, int V) {
 
     /********TESTES*******/
     /*O nosso aeroporto é o de CONGONHAS*/
@@ -32,19 +32,22 @@ Aviao* geradorDeAvioes() {
     /*Os vôos de emergência ocorrem com probabilidade de 10%*/
     bool emergencia = ( (rand()%10) == 0 ) ? 1 : 0;
     string aeroportoDestOrigem = aeroportos[rand()%33];
-    int quantidadeCombustivel = 4 + rand()%5;
-    int durVoo = 30 + rand()%20;
+    int quantidadeCombustivel = 1 + rand()%C;
+    int durVoo = 1 + rand()%V;
     int tempoDeEspera = 0;
     int prioridade = 0;
 
     if(emergencia) prioridade = 2;
+    /*Se o avião for decolar, seu combustível deve ser de no mínimo o tempo de voo*/
     if(!pouso) quantidadeCombustivel = durVoo;
+    /*Aviões que irão pousar não possuem duração de voo*/
     else durVoo = 0;
+
     if(pouso) aeroportoDestOrigem = aeroportos[0];
 
     return new Aviao( compAerea, numeroDoAviao, pouso, emergencia, aeroportoDestOrigem, quantidadeCombustivel, durVoo, tempoDeEspera, prioridade);
 }
-
+/*Uma transição entre as exibições dos dados do aeroporto*/
 void transicaoEntreExibicoes() {
     int num = 27;
     bool parou = false;
@@ -69,45 +72,40 @@ void transicaoEntreExibicoes() {
     } 
 }
 
-int main() {
-    int T = 100; /*Tempo de simulação*/
-    /*K - Número máximo de aviões que se comunicam com a torre por unid de tempo, 
+int main(int argc, char* argv[]) {
+    /* T - Tempo de simulação, K - Número máximo de aviões que se comunicam com a torre por unid de tempo, 
     C - número máximo de tempo de combustível, V - Tempo máximo estimado de voo */
-    int K = 10, C, V;
-    int i, j, k; /*Iterador*/
+    int T, K , C, V;
+    T = stoi(argv[1]); K = stoi(argv[2]); C = stoi(argv[3]); V = stoi(argv[4]); 
+    int i, j, k; /*Iteradores*/
     int time = 8*60; /*Horário*/
 
     /*SEMENTE*/
-    int semente = 23;
+    int semente = stoi(argv[5]);
     srand(semente);
 
     Aeroporto aeroporto;
     Aviao* aviao;    
 
-    /*Delay na exibição*/
     for (i = 0; i < T; i++) {
         cout << "*****************************AEROPORTO DE CONGONHAS*****************************" << endl << endl;
         printf("----------------------------------HORÁRIO %02d:%02d---------------------------------\n\n", time/60, time%60); 
         time++;
 
-        for (j = 0; j < rand()%3+1; j++) {
+        for (j = 0; j < rand()%K; j++) {
             /*Objeto avião*/
-            aviao = geradorDeAvioes();
-            //cout << "Novo aviao: ";
-            //aeroporto.printaElemento(aviao);
+            aviao = geradorDeAvioes(C, V);
                 
-            /*Tenta inserir os novos avioes na fila*/
+            /*Tenta inserir os novos aviões na fila*/
             aeroporto.contatoComATorre(aviao);
         }
-        //aeroporto.printaFilaCompleta();
         aeroporto.liberaVoos();
         aeroporto.atualizaSituacaoDosAvioesNaFila();
         aeroporto.atualizaDispDePista();
-        //aeroporto.printaFilaCompleta();
         aeroporto.coletaEstatisticasEPrinta();
         
-        transicaoEntreExibicoes();
-        usleep(1000000);
+        //transicaoEntreExibicoes();
+        //usleep(1000000);
     }
 
     return 0;

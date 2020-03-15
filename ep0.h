@@ -7,6 +7,7 @@ class Aviao {
     public:
         Aviao(string compArea, int numAviao, bool pous, bool emerg, 
         string aeroDestOrig, int quantComb, int durVoo, int tempEsp, int prioridade);
+        /*Métodos de exibição*/
         void printaAviao(int exibir_pouso);
         void printaElemento();
         /*Gets*/
@@ -17,13 +18,11 @@ class Aviao {
         int getDuracaoDoVoo();
         int getTempoDeEspera();
         /*Sets*/
-        void setPrioridade(int prio);
         void setQuantCombust(int quant);
         void setTempoDeEspera(int tempo);
-        
+        void setPrioridade(int prio);           
     private:
         string companhiaAerea;
-        int prioridade;
         int numeroDoAviao;
         bool pouso;
         bool emergencia;
@@ -31,6 +30,7 @@ class Aviao {
         int quantCombust;
         int duracaoDoVoo;
         int tempoDeEspera;
+        int prioridade;
 };
 
 Aviao :: Aviao(string compArea, int numAviao, bool pous, bool emerg, 
@@ -98,7 +98,7 @@ Os níveis de prioridade foram definidos da seguinte forma:
 3- avião sem combustível;
 2- emergências;
 1- aviões esperando por mais de 10% do tempo esperado de vôo para decolar
-0- vôos normais
+0- voos normais
 */
 struct cabecaTorreDeControle {
     elementoDaFila* primerElmPrioridade[4];
@@ -142,7 +142,9 @@ class Aeroporto {
         double quantCombTotalAvPousaram;
         int quantVoosEmerg;
         int nAvioesQueDecolaram;
-        int numAvioesCairam;
+        int nAvioesCairam;
+        int nAvioesEnviadosAOutroAeroporto;
+        double porcentAvioesEnviadosAOutrosAeroportos;
 
         /*Controle das filas*/
         int numElem;
@@ -188,7 +190,9 @@ Aeroporto :: Aeroporto() {
     quantCombTotalAvPousaram = 0;
     quantVoosEmerg = 0;
     nAvioesQueDecolaram = 0;
-    numAvioesCairam = 0;
+    nAvioesCairam = 0;
+    nAvioesEnviadosAOutroAeroporto = 0;
+    porcentAvioesEnviadosAOutrosAeroportos = 0;
 
     numElem = 0;
     for (int i = 0; i < 4; i++) 
@@ -223,13 +227,13 @@ Aeroporto::~Aeroporto() {
 
 /*Aviões contatam a torre de comando*/
 void Aeroporto :: contatoComATorre(Aviao* aviao) {
-    if(aviao->getPrioridade() == 2 && numElemPrio[2] >= 9)
+    if(aviao->getPrioridade() == 2 && numElemPrio[2] >= 9 && aviao->getPouso())
         envioParaOutroAeroporto(aviao);
     /*O aeroporto só possue 3 pistas, leva-se uma unidade de tempo para decolar/pousar e
     mais 2 unidades para a liberação da pista, logo um avião de emergência precisa de no mínimo
     quantAvioesEmergenciaFila/3 * 3unidades de tempo + 2 unidades = numElemPrio[2] + 2 de combustível,
     pois quando o avião entrar na fila pode ser que a pista já esteja indisponível por 2 segundo */
-    else if(aviao->getPrioridade() == 2 && (aviao->getQuantCombust() < numElemPrio[2]+2))
+    else if(aviao->getPrioridade() == 2 && (aviao->getQuantCombust() < numElemPrio[2]+2) && aviao->getPouso())
         envioParaOutroAeroporto(aviao);
     else if(aviao->getPrioridade() == 0 && aviao->getPouso() && aviao->getQuantCombust() < numElem+2)
         envioParaOutroAeroporto(aviao);
@@ -238,6 +242,7 @@ void Aeroporto :: contatoComATorre(Aviao* aviao) {
 }
 
 void Aeroporto :: envioParaOutroAeroporto(Aviao* aviao) {
+    nAvioesEnviadosAOutroAeroporto++;
     /*
     cout << "O avião: " << aviao->companhiaArea << aviao->numeroDoAviao << 
     "foi enviado para outro aeroporto" << endl;*/
@@ -390,7 +395,7 @@ void Aeroporto :: atualizaSituacaoDosAvioesNaFila() {
             if(aux->aviao->getQuantCombust() < 0) {
                 cout << "O avião caiu" << endl;
                 liberaAviao(remove(aux));
-                numAvioesCairam++;
+                nAvioesCairam++;
             }
             else if( prioridade == 0 && aux->aviao->getQuantCombust() <= 5 && aux->aviao->getQuantCombust() > 2)
                 nAvioesComFuturoRiscoDeComb++;
@@ -483,6 +488,8 @@ void Aeroporto :: coletaEstatisticasEPrinta() {
     }
     ((numElem-nAvioesAPousar) != 0) ? tMedioEsperaDecolagem /= (numElem - nAvioesAPousar) : tMedioEsperaDecolagem = 0;
     ((nAvioesQuePousaram != 0)) ? quantMediaCombAvPousaram = quantCombTotalAvPousaram/nAvioesQuePousaram : quantMediaCombAvPousaram = -1;
+    ((nAvioesQuePousaram+nAvioesQueDecolaram) == 0) ? porcentAvioesEnviadosAOutrosAeroportos = 0 : porcentAvioesEnviadosAOutrosAeroportos = nAvioesEnviadosAOutroAeroporto*100/(nAvioesQueDecolaram+nAvioesQuePousaram);
+    
     cout << "-----------------------------ESTATÍSTICAS DO AEROPORTO--------------------------" << endl << endl;
     cout << " * Os aviões que estão esperando para pousar são: ";
     printaFila(1, 1);
@@ -497,24 +504,12 @@ void Aeroporto :: coletaEstatisticasEPrinta() {
     cout << " * A quantidade de aviões pousando/decolando em condições de emergência é: " << quantVoosEmerg << endl << endl;
     cout << " * A quantidade total de aviões que já pousaram é: " << nAvioesQuePousaram << endl << endl;
     cout << " * A quantidade total de aviões que já decolaram é: " << nAvioesQueDecolaram << endl << endl;
-    cout << " * A quantidade de aviões que cairam é: " << numAvioesCairam << endl;
+    cout << " * A quantidade de aviões que cairam é: " << nAvioesCairam << endl << endl;
+    cout << " * A quantidade de aviões enviados a outros aeroportos é: " << nAvioesEnviadosAOutroAeroporto << endl << endl;
+    cout << " * A porcentagem de aviões enviados para outros aeroportos é: " << porcentAvioesEnviadosAOutrosAeroportos << "%" << endl;
     cout << "--------------------------------------------------------------------------------" << endl;
 }
-/*
-void Aeroporto :: printaAviao(Aviao* aviao, int pouso) {
-    if(pouso && aviao->pouso)
-        cout << aviao->companhiaArea << aviao->numeroDoAviao << "; ";
-    else if(!pouso && !aviao->pouso)
-        cout << aviao->companhiaArea << aviao->numeroDoAviao << "; ";
-}
-void Aeroporto :: printaElemento(Aviao* aviao) {
-    cout << aviao->companhiaArea << aviao->numeroDoAviao <<
-    " , pri: " << aviao->prioridade << " , emg: " << aviao->emergencia <<
-    " , pouso: " << aviao->pouso << " , qCom: " << aviao->quantCombust <<
-    " , durVoo: " << aviao->duracaoDoVoo << " , tEsp: " << aviao->tempoDeEspera <<
-    " , dest: "<< aviao->aeroportoDestOrig << endl;
-}
-*/
+
 void Aeroporto :: printaFila(int tipoDePrintagem, int pouso) {
     int nPouso, nDec;
     nPouso = nDec = 0;
@@ -551,4 +546,3 @@ void Aeroporto :: printaFilaCompleta() {
     }
 }
 #endif  
-/*O codigo tinha 644 linhas de codigo*/

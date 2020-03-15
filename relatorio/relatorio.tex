@@ -5,14 +5,41 @@
 
 \title{Relatório EP0}
 \author{Gabriel Henrique Pinheiro Rodrigues NUSP: 112.216-47}
-\date{February 2020}
+\date{Março 2020}
 
 \begin{document}
    \maketitle
-\section{Implementação}
-Na implementação do programa de gerenciamento de um aeroporto, foi utilizado duas classes principais:
+
+   \section{Como executar o EP na linha de comando: }
+Após compilado : ./ep0 T K C V S
+\\
+onde:
+\begin{itemize}
+   \item T - int - informa o tempo da simulação;
+   \item K - int - número máximo de solicitações a torre de comando por unidade de tempo;
+   \item C - int - número máximo de combustível;
+   \item V - int - número máximo da duração do voo;
+   \item S - int - semente da simulação;
+   
+\end{itemize}
+
+\section{Plano de Implementação}
+Na implementação do programa de gerenciamento de um aeroporto, foram utilizadas duas classes principais: A 
+\textbf{classe Avião} e a \textbf{classe Aeroporto}, dentro da classe Aeroporto há 4 filas, cada uma separada pelo nível de
+prioridade (*). Também foram criados \textbf{2 structs}, um chamado \textbf{elementoDaFila}, que contém
+um ponteiro para o objeto da classe Avião e é utilizado como célula da fila, e outro struct chamado
+\textbf{cabecaTorreDeControle} que contém ponteiros para os elementos iniciais e finais de cada uma das
+4 filas;
 \\\\
-A \textbf{classe Avião}, que contém:
+(*) As \textbf{prioridades} foram definidas da seguinte forma:
+\begin{itemize}
+   \item 3 - Prioridade máxima - Corresponde aos aviões sem combustível;
+   \item 2 - Voos de emergência - Ex. presidencial, acidentes;
+   \item 1 - Aviões que já estão esperando por mais de 10\% do tempo total de voo para decolar;
+   \item 0 - Demais aviões;   
+\end{itemize}
+
+A \textbf{classe Avião} contém:
 
 \begin{itemize}
  \item O nome da companhia aérea;
@@ -23,43 +50,99 @@ A \textbf{classe Avião}, que contém:
  \item A quantidade de combustível;
  \item A duração do voo;
  \item O tempo de espera;
+ \item A prioridade do voo;
 \end{itemize}
-E a \textbf{classe Aeroporto}, que contém :
+
+A \textbf{classe Aeroporto} contém:
 
 \begin{itemize}
  \item O número de elementos da fila;
  \item A disponibilidade de cada uma das 3 pistas;
- \item Ponteiro para a cabeça da fila e para o último elemento;
+ \item Ponteiro para a cabecaTorreDeControle - Struct que contém ponteiros que apontam para os 
+ elementos iniciais e finais de cada uma das 4 filas;
  \item Métodos para a manipulação da fila;
  \item Métodos para a atualização da disponibilidade das pistas;
+ \item Métodos de exibição dos elementos da fila;
 \end{itemize}
 
 Por motivos de encapsulamento os elementos da fila são estruturas que apontam para aviões, essas estruturas também possuem o endereço do próximo elemento da fila e para o anterior, dessa forma a fila implementada é uma lista duplamente encadeada;
 
-Os métodos que manipulam a fila são: 
+\section{Funcionamento do Aeroporto}
+A cada unidade de tempo os métodos da classe Aeroporto que são executados são:
 
 \begin{itemize}
- \item insereNoFim;
- \item insereNoInicio;
- \item remove;
- \item printaElemento;
- \item printaFila;
+   \item \textbf{contatoComATorre(Aviao* aviao)} - Verifica se é possível inserir o avião em alguma fila ou se
+   é melhor que esse seja direcionado a outro aeroporto (*1);
+   \item \textbf{liberaVoos()} - Enquanto houver pistas disponíveis tenta liberar os aviões para pouso e decolagem
+   respeitando os níveis de prioridade;
+   \item \textbf{atualizaSituacaoDosAvioesNaFila()} - Decrementa a quantidade de combustível dos aviões na fila, aumenta
+   o tempo de espera e altera a prioridade caso necessário. (Caso algum avião de prioridade 0
+   fica sem combustível, sua prioridade vai para 3, se o avião já estiver esperando por mais de 10\% do
+   seu tempo de voo, sua prioridade vai para 1);
+   \item \textbf{atualizaDispDePista()} - Decrementa o tempo de espera para a liberação das pistas e troca a sua
+   disponibilidade;
+   \item \textbf{coletaEstatisticasEPrinta()} - Armazena dados interessantes e exibe na hora da execução - Ex. número de aviões que cairam,
+   número de aviões enviados a outros aeroportos, ...
 \end{itemize}
-Em tese, uma fila sempre remove do início e insere no fim, porém devido a prioridade de cada voo, foram criados dois métodos de inserção.
+(*1) Critérios utilizados:\\\\
+ - Se já há 9 emergências na fila e o avião atual é de pouso de emergência esse será enviado a outro aeroporto;
+\\\\
+ - Se ainda não há 9 emergências na fila e o avião atual é de pouso de emergência, mas sua quantidade de combustível
+ é menor que o tempo que os outros aviões de emergência vão levar para liberar a pista, então ele será
+ enviado a outro aeroporto; 
+\\\\
+ - Se o avião tem prioridade 0, mas sua quantidade de combustível é menor que o tempo de liberação
+da pista, então ele também é enviado a outro aeroporto;
+\\\\
+ - Caso contrário, ele é inserido em sua respectiva fila(De acordo com a sua prioridade);
 
-\section{Prioridades na fila}
-Cada objeto da classe Avião contém um número de 0 a 3 que define sua prioridade na fila, quanto maior o número, maior a prioridade. Os aviões e suas respectivas prioridades são definidas da seguinte forma:
-
-\begin{itemize}
-\item 3 - Aviões que estão sem combustível;
-\item 2 - Voos de emergência;
-\item 1 - Aviões que estão esperando para decolar por mais de 10\% do tempo estimado da duração da viagem;
-\item 0 - Demais aviões;
-\end{itemize}
-
-A cada unidade de tempo as posições na fila são remanejadas, de forma que os aviões são organizados por ordem descrescente de prioridade.
 
 \section{Testes}
-Para realizar os testes escolhemos K=10, T=15, C=30, porém o programa funciona bem para casos maiores.
+Para gerar os objetos da classe Avião criamos uma função que monta de maneira semi-aleatória o objeto, a
+\textbf{proporção de voos de emergência é 10\%}, foram escolhidas \textbf{7 companhias aéreas} e \textbf{33 aeroportos}, a probabilidade
+de um avião querer pousar ou decolar é a mesma.
+
+\subsection{Os testes realizados foram}
+0-) INPUT: T=500, K=3, C=20, V=20, S=17\\
+   
+OUTPUT: 
+\begin{itemize}
+   \item Os aviões que estão esperando para pousar são: Nenhum;
+   \item Os aviões que estão esperando para decolar são: Nenhum;
+   \item A quantidade média de combustível dos aviões que pousaram: 10.7351;
+   \item A quantidade de aviões pousando/decolando em condições de emergência é: 29;
+   \item A quantidade total de aviões que já pousaram é: 185;
+   \item A quantidade total de aviões que já decolaram é: 201;
+   \item A quantidade de aviões que cairam é: 0;
+   \item A porcentagem de aviões enviados para outros aeroportos é: 3\%;
+\end{itemize}
+\\
+1-) INPUT: T=500, K=5, C=20, V=20, S=17\\
+   
+OUTPUT: 
+\begin{itemize}
+   \item Os aviões que estão esperando para pousar são: Nenhum;
+   \item Os aviões que estão esperando para decolar são: Nenhum;
+   \item A quantidade média de combustível dos aviões que pousaram: 9.94595;
+   \item A quantidade de aviões pousando/decolando em condições de emergência é: 39;
+   \item A quantidade total de aviões que já pousaram é: 296;
+   \item A quantidade total de aviões que já decolaram é: 270;
+   \item A quantidade de aviões que cairam é: 0;
+   \item A porcentagem de aviões enviados para outros aeroportos é: 12\%;
+\end{itemize}
+
+2-) INPUT: T=500, K=7, C=20, V=20, S=17\\
+
+OUTPUT: 
+\begin{itemize}
+   \item Os aviões que estão esperando para pousar são: LA465; AZ207; AZ761;
+   \item Os aviões que estão esperando para decolar são: AZ207; AZ761;
+   \item A quantidade média de combustível dos aviões que pousaram: 4.19298;
+   \item A quantidade de aviões pousando/decolando em condições de emergência é: 36;
+   \item A quantidade total de aviões que já pousaram é: 228;
+   \item A quantidade total de aviões que já decolaram é: 343;
+   \item A quantidade de aviões que cairam é: 0;
+   \item A porcentagem de aviões enviados para outros aeroportos é: 44\%;
+\end{itemize}
 
 \end{document}
