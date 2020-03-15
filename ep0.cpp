@@ -1,6 +1,6 @@
 #include <iostream>
 #include <unistd.h>
-#include "ep0novo.h"
+#include "ep0.h"
 #define SECOND 1000000
 
 using namespace std;
@@ -65,7 +65,7 @@ void transicaoEntreExibicoes() {
                 parou = true;
         }
         cout << endl;
-        usleep(50000);
+        //usleep(50000);
     } 
 }
 
