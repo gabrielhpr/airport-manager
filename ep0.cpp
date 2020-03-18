@@ -1,7 +1,6 @@
 #include <iostream>
 #include <unistd.h>
 #include "ep0.h"
-#define SECOND 1000000
 
 using namespace std;
 
@@ -47,30 +46,7 @@ Aviao* geradorDeAvioes(int C, int V) {
 
     return new Aviao( compAerea, numeroDoAviao, pouso, emergencia, aeroportoDestOrigem, quantidadeCombustivel, durVoo, tempoDeEspera, prioridade);
 }
-/*Uma transição entre as exibições dos dados do aeroporto*/
-void transicaoEntreExibicoes() {
-    int num = 27;
-    bool parou = false;
-    int j, k;
-    cout << "********************************************************************************" << endl
-    << endl;
-    for (j = 0; j < num && !parou; j++) {
-        for (k = 0; k < num; k++) {
-            if (k == num / 2 && j == (num / 2))
-                cout << "   ";
-            else if (k <= j && j < (num / 2) + 1)
-                cout << "   ";
-            else if (k >= num - j - 1 && j < (num / 2) + 1)
-                cout << "   ";
-            else if (j < (num / 2))
-                cout << " * ";
-            else
-                parou = true;
-        }
-        cout << endl;
-        //usleep(50000);
-    } 
-}
+
 
 int main(int argc, char* argv[]) {
     /* T - Tempo de simulação, K - Número máximo de aviões que se comunicam com a torre por unid de tempo, 
@@ -103,8 +79,8 @@ int main(int argc, char* argv[]) {
         aeroporto.atualizaSituacaoDosAvioesNaFila();
         aeroporto.atualizaDispDePista();
         aeroporto.coletaEstatisticasEPrinta();
-        
-        //transicaoEntreExibicoes();
+
+        //Exibe a cada 1 segundo
         //usleep(1000000);
     }
 

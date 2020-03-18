@@ -102,47 +102,128 @@ Para gerar os objetos da classe Avião criamos uma função que monta de maneira
 \textbf{proporção de voos de emergência é 10\%}, foram escolhidas \textbf{7 companhias aéreas} e \textbf{33 aeroportos}, a probabilidade
 de um avião querer pousar ou decolar é a mesma.
 
+\newpage
 \subsection{Os testes realizados foram}
-0-) INPUT: T=500, K=3, C=20, V=20, S=17\\
-   
-OUTPUT: 
+\subsubsection{Variação do K}
+
 \begin{itemize}
-   \item Os aviões que estão esperando para pousar são: Nenhum;
-   \item Os aviões que estão esperando para decolar são: Nenhum;
-   \item A quantidade média de combustível dos aviões que pousaram: 10.7351;
-   \item A quantidade de aviões pousando/decolando em condições de emergência é: 29;
-   \item A quantidade total de aviões que já pousaram é: 185;
-   \item A quantidade total de aviões que já decolaram é: 201;
-   \item A quantidade de aviões que cairam é: 0;
-   \item A porcentagem de aviões enviados para outros aeroportos é: 3\%;
-\end{itemize}
-\\
-1-) INPUT: T=500, K=5, C=20, V=20, S=17\\
-   
-OUTPUT: 
-\begin{itemize}
-   \item Os aviões que estão esperando para pousar são: Nenhum;
-   \item Os aviões que estão esperando para decolar são: Nenhum;
-   \item A quantidade média de combustível dos aviões que pousaram: 9.94595;
-   \item A quantidade de aviões pousando/decolando em condições de emergência é: 39;
-   \item A quantidade total de aviões que já pousaram é: 296;
-   \item A quantidade total de aviões que já decolaram é: 270;
-   \item A quantidade de aviões que cairam é: 0;
-   \item A porcentagem de aviões enviados para outros aeroportos é: 12\%;
+   \item 0) INPUT: T=500, \textbf{K=3}, C=20, V=20, S=17 \\\\
+   OUTPUT: 
+   \begin{itemize}
+      \item Os aviões que estão esperando para pousar são: Nenhum;
+      \item Os aviões que estão esperando para decolar são: Nenhum;
+      \item A quantidade média de combustível dos aviões que pousaram: \textbf{10.7351};
+      \item A quantidade de aviões pousando/decolando em condições de emergência é: 29;
+      \item A quantidade total de aviões que já pousaram é: 185;
+      \item A quantidade total de aviões que já decolaram é: 201;
+      \item A quantidade de aviões que cairam é: 0;
+      \item A porcentagem de aviões enviados para outros aeroportos é: \textbf{3\%};
+   \end{itemize}
 \end{itemize}
 
-2-) INPUT: T=500, K=7, C=20, V=20, S=17\\
+\hline
 
-OUTPUT: 
 \begin{itemize}
-   \item Os aviões que estão esperando para pousar são: LA465; AZ207; AZ761;
-   \item Os aviões que estão esperando para decolar são: AZ207; AZ761;
-   \item A quantidade média de combustível dos aviões que pousaram: 4.19298;
-   \item A quantidade de aviões pousando/decolando em condições de emergência é: 36;
-   \item A quantidade total de aviões que já pousaram é: 228;
-   \item A quantidade total de aviões que já decolaram é: 343;
-   \item A quantidade de aviões que cairam é: 0;
-   \item A porcentagem de aviões enviados para outros aeroportos é: 44\%;
+   \item 1-) INPUT: T=500, \textbf{K=5}, C=20, V=20, S=17\\\\
+   OUTPUT: 
+   \begin{itemize}
+      \item Os aviões que estão esperando para pousar são: Nenhum;
+      \item Os aviões que estão esperando para decolar são: Nenhum;
+      \item A quantidade média de combustível dos aviões que pousaram: \textbf{9.94595};
+      \item A quantidade de aviões pousando/decolando em condições de emergência é: 39;
+      \item A quantidade total de aviões que já pousaram é: 296;
+      \item A quantidade total de aviões que já decolaram é: 270;
+      \item A quantidade de aviões que cairam é: 0;
+      \item A porcentagem de aviões enviados para outros aeroportos é: \textbf{12\%};
+   \end{itemize} 
 \end{itemize}
+  
+\hline
+
+\begin{itemize}
+   \item 2-) INPUT: T=500, \textbf{K=7}, C=20, V=20, S=17\\\\
+   OUTPUT: 
+   \begin{itemize}
+      \item Os aviões que estão esperando para pousar são: LA465; AZ207; AZ761;
+      \item Os aviões que estão esperando para decolar são: AZ207; AZ761;
+      \item A quantidade média de combustível dos aviões que pousaram: \textbf{4.19298};
+      \item A quantidade de aviões pousando/decolando em condições de emergência é: 36;
+      \item A quantidade total de aviões que já pousaram é: 228;
+      \item A quantidade total de aviões que já decolaram é: 343;
+      \item A quantidade de aviões que cairam é: 0;
+      \item A porcentagem de aviões enviados para outros aeroportos é: \textbf{44\%};
+   \end{itemize}
+\end{itemize}
+
+\hline
+
+\subsubsection{Variação do C}
+
+\begin{itemize}
+   \item 0) INPUT: T=500, K=5, \textbf{C=5}, V=20, S=17 \\\\
+   OUTPUT: 
+   \begin{itemize}
+      \item Os aviões que estão esperando para pousar são: Nenhum;
+      \item Os aviões que estão esperando para decolar são: Nenhum;
+      \item A quantidade média de combustível dos aviões que pousaram: \textbf{3.13063};
+      \item A quantidade de aviões pousando/decolando em condições de emergência é: 34;
+      \item A quantidade total de aviões que já pousaram é: 222;
+      \item A quantidade total de aviões que já decolaram é: 265;
+      \item A quantidade de aviões que cairam é: 0;
+      \item A porcentagem de aviões enviados para outros aeroportos é: \textbf{30\%};
+   \end{itemize}
+\end{itemize}
+
+\hline
+
+\begin{itemize}
+   \item 1-) INPUT: T=500, K=5, \textbf{C=10}, V=20, S=17\\\\
+   OUTPUT: 
+   \begin{itemize}
+      \item Os aviões que estão esperando para pousar são: Nenhum;
+      \item Os aviões que estão esperando para decolar são: Nenhum;
+      \item A quantidade média de combustível dos aviões que pousaram: \textbf{5.33588};
+      \item A quantidade de aviões pousando/decolando em condições de emergência é: 30;
+      \item A quantidade total de aviões que já pousaram é: 262;
+      \item A quantidade total de aviões que já decolaram é: 272;
+      \item A quantidade de aviões que cairam é: 0;
+      \item A porcentagem de aviões enviados para outros aeroportos é: \textbf{20\%};
+   \end{itemize} 
+\end{itemize}
+  
+\hline
+
+\begin{itemize}
+   \item 2-) INPUT: T=500, K=5, \textbf{C=15}, V=20, S=17\\\\
+   OUTPUT: 
+   \begin{itemize}
+      \item Os aviões que estão esperando para pousar são: Nenhum;
+      \item Os aviões que estão esperando para decolar são: Nenhum;
+      \item A quantidade média de combustível dos aviões que pousaram: \textbf{7.68641};
+      \item A quantidade de aviões pousando/decolando em condições de emergência é: 36;
+      \item A quantidade total de aviões que já pousaram é: 287;
+      \item A quantidade total de aviões que já decolaram é: 278;
+      \item A quantidade de aviões que cairam é: 0;
+      \item A porcentagem de aviões enviados para outros aeroportos é: \textbf{14\%};
+   \end{itemize}
+\end{itemize}
+
+\hline
+
+\begin{itemize}
+   \item 3-) INPUT: T=500, K=5, \textbf{C=20}, V=20, S=17\\\\
+   OUTPUT: 
+   \begin{itemize}
+      \item Os aviões que estão esperando para pousar são: Nenhum;
+      \item Os aviões que estão esperando para decolar são: Nenhum;
+      \item A quantidade média de combustível dos aviões que pousaram: \textbf{9.94595};
+      \item A quantidade de aviões pousando/decolando em condições de emergência é: 39;
+      \item A quantidade total de aviões que já pousaram é: 296;
+      \item A quantidade total de aviões que já decolaram é: 270;
+      \item A quantidade de aviões que cairam é: 0;
+      \item A porcentagem de aviões enviados para outros aeroportos é: \textbf{12\%};
+   \end{itemize}
+\end{itemize}
+
 
 \end{document}
